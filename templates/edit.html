@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}PO Translation{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+
+<body class="edit-page">
+    <div class="edit-container">
+
+        {% block content %}
+        <h1>Translation Editing</h1>
+        <style>
+            .row-light {
+                background: #f9f9f9;
+            }
+
+            .row-dark {
+                background: #e3f2fd;
+            }
+        </style>
+        <form method="POST" id="edit-form">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Original</th>
+                        <th>Translation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in po %}
+                    <tr class="{{ 'row-light' if loop.index0 % 2 == 0 else 'row-dark' }}">
+                        <td>
+                            <strong>{{ entry.msgid }}</strong>
+                        </td>
+                        <td>
+                            <textarea name="msgstr_{{ entry.msgid }}"
+                                oninput="autoGrow(this)">{{ entry.msgstr | e }}</textarea>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div style="text-align:right">
+                <button type="submit" id="save-btn">Save</button>
+                <a href="javascript:void(0)" id="edit-btn" style="display:none">Edit</a><br>
+                <div id="download-btns" style="display:none; clear: both;">
+                    <a href="/download/{{ file_id }}" class="edit-link">Download .po file</a>
+                    <a href="/download_mo/{{ file_id }}" class="edit-link">Download .mo file</a>
+                </div>
+            </div>
+        </form>
+        {% endblock %}
+
+    </div>
+    <script>
+        function autoGrow(element) {
+            element.style.height = 'auto';
+            element.style.height = (element.scrollHeight) + 'px';
+            element.style.overflowY = 'hidden';
+        }
+        function setTextareasDisabled(disabled) {
+            document.querySelectorAll('textarea').forEach(function (el) {
+                el.disabled = disabled;
+            });
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            function growAllTextareas() {
+                document.querySelectorAll('textarea').forEach(function (el) {
+                    autoGrow(el);
+                });
+            }
+            growAllTextareas();
+            document.querySelectorAll('textarea').forEach(function (el) {
+                el.addEventListener('input', function() {
+                    autoGrow(el);
+                });
+            });
+            window.addEventListener('resize', growAllTextareas);
+            document.getElementById('edit-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                fetch('', {
+                    method: 'POST',
+                    body: new FormData(this)
+                }).then(function(resp) {
+                    if (resp.ok) {
+                        document.getElementById('save-btn').style.display = 'none';
+                        document.getElementById('edit-btn').style.display = 'inline-block';
+                        document.getElementById('download-btns').style.display = 'inline-block';
+                        setTextareasDisabled(true);
+                    }
+                });
+            });
+            document.getElementById('edit-btn').addEventListener('click', function() {
+                setTextareasDisabled(false);
+                document.getElementById('save-btn').style.display = 'inline-block';
+                document.getElementById('edit-btn').style.display = 'none';
+                document.getElementById('download-btns').style.display = 'none';
+            });
+        });
+    </script>
+</body>
+
+</html>

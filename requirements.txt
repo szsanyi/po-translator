@@ -1,0 +1,6 @@
+flask>=2.2
+polib>=1.1.0
+transformers>=4.30.0
+huggingface_hub>=0.17.0
+langcodes>=3.3.0
+sacremoses>=0.0.53

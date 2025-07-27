@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>PO Translation - In Progress</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <h2>PO Translation - In Progress</h2>
+    <div class="progress-box">
+        <div class="progress-container">
+            <div id="progress-bar" class="progress-bar">0%</div>
+        </div>
+        <div class="center">
+            <span id="progress-text">0 / 0</span>
+        </div>
+        <div class="center">
+            <a id="edit-link" class="edit-link" style="display:none;" href="">Edit Translation</a>
+        </div>
+    </div>
+
+    <script>
+        const fileId = "{{ file_id }}";
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const editLink = document.getElementById('edit-link');
+
+        function updateProgress() {
+            fetch(`/progress/${fileId}`)
+                .then(response => response.json())
+                .then(data => {
+                    let percent = data.total > 0 ? Math.round(data.done / data.total * 100) : 0;
+                    progressBar.style.width = percent + '%';
+                    progressBar.textContent = percent + '%';
+                    progressText.textContent = `${data.done} / ${data.total}`;
+                    if (data.finished) {
+                        editLink.href = `/edit/${fileId}`;
+                        editLink.style.display = 'block';
+                        progressBar.style.background = '#4caf50';
+                        progressBar.textContent = 'Done!';
+                        setTimeout(() => {
+                            window.location.href = `/edit/${fileId}`;
+                        }, 1500);
+                    } else {
+                        setTimeout(updateProgress, 1000);
+                    }
+                })
+                .catch(() => {
+                    progressBar.textContent = 'Error fetching progress';
+                });
+        }
+        updateProgress();
+    </script>
+</body>
+
+</html>

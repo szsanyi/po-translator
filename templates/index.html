@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>PO Translation</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <h1>PO Translation <span class="offline">(offline)</span></h1>
+    <div class="form-box">
+        <form method="POST" enctype="multipart/form-data">
+            <label for="po_file">Select PO file:</label>
+            <input type="file" name="po_file" accept=".po" required>
+
+            <label for="lang">Target language:</label>
+            <select name="lang">
+                {% for code, label in model_codes.items() %}
+                <option value="{{ code }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+
+            <div class="button-container">            
+                <button type="submit">Start Translation</button>
+            </div>
+        </form>
+    </div>
+</body>
+
+</html>
