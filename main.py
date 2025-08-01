@@ -6,6 +6,7 @@ import os
 import polib
 import threading
 import uuid
+import torch
 
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
@@ -14,6 +15,8 @@ PROGRESS_FOLDER = 'progress'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(TRANSLATED_FOLDER, exist_ok=True)
 os.makedirs(PROGRESS_FOLDER, exist_ok=True)
+
+USE_CUDA = True
 
 def get_available_models():
     models = list_models(author="Helsinki-NLP")
@@ -50,13 +53,16 @@ loaded_models = {}
 def get_model_pair(code):
     if code not in loaded_models:
         tokenizer = MarianTokenizer.from_pretrained(MODELS[code])
-        model = MarianMTModel.from_pretrained(MODELS[code])
+        model = MarianMTModel.from_pretrained(MODELS[code])        
+        if USE_CUDA and torch.cuda.is_available():
+            model = model.to('cuda')
         loaded_models[code] = (tokenizer, model)
     return loaded_models[code]
 
 def translate_text(text, code):
     tokenizer, model = get_model_pair(code)
-    inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True)
+    device = 'cuda' if USE_CUDA and torch.cuda.is_available() else 'cpu'
+    inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True).to(device)
     translated = model.generate(**inputs)
     return tokenizer.decode(translated[0], skip_special_tokens=True)
 
