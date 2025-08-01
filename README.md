@@ -36,7 +36,7 @@ A web application for translating and editing PO files, built with Flask and Mar
 
 ## Folder Structure
 ```
-python/sandbox/wordpress-translator/po-translator/
+po-translator/
 ├── main.py
 ├── requirements.txt
 ├── templates/
